@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Museum Walk — CDN (No Localhost)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Museum Walk — Mobile Ready</title>
   <style>
-    html, body { height: 100%; margin: 0; overflow: hidden; background: #0b0b10; }
-    canvas { display:block; outline:none; }
+    html, body { height: 100%; margin: 0; overflow: hidden; background: #0b0b10; touch-action: none; }
+    canvas { display:block; outline:none; touch-action:none; }
 
     .hud {
-      position: fixed; left: 14px; top: 14px; z-index: 10;
+      position: fixed; left: 12px; top: 12px; z-index: 10;
       color: rgba(255,255,255,.92);
-      font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      font: 13px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background: rgba(0,0,0,.35);
       border: 1px solid rgba(255,255,255,.12);
-      padding: 12px 12px;
+      padding: 10px 10px;
       border-radius: 12px;
       backdrop-filter: blur(10px);
-      max-width: 860px;
+      max-width: 92vw;
     }
     .hud b { font-weight: 900; }
     .hint { opacity:.85; margin-top:6px; }
@@ -29,18 +29,18 @@
       color: rgba(255,255,255,.95);
       font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial;
       text-align:center;
-      padding: 24px;
+      padding: 18px;
     }
     .overlayCard{
       width:min(760px, 92vw);
       background: rgba(0,0,0,.45);
       border: 1px solid rgba(255,255,255,.14);
       border-radius: 18px;
-      padding: 18px 18px;
+      padding: 16px 14px;
       backdrop-filter: blur(10px);
       box-shadow: 0 24px 70px rgba(0,0,0,.35);
     }
-    .overlayCard h1{ margin:0 0 10px; font-size:22px; }
+    .overlayCard h1{ margin:0 0 8px; font-size:22px; }
     .overlayCard p{ margin: 8px 0; opacity:.92; }
     .startBtn{
       margin-top: 14px;
@@ -52,6 +52,8 @@
       font-weight: 900;
       cursor: pointer;
       box-shadow: 0 14px 34px rgba(255,59,107,.22);
+      width: 100%;
+      max-width: 320px;
     }
 
     .modal {
@@ -59,7 +61,7 @@
       display:none;
       align-items:center; justify-content:center;
       background: rgba(0,0,0,.75);
-      padding: 18px;
+      padding: 14px;
     }
     .modal.show{ display:flex; }
     .modalCard{
@@ -72,10 +74,10 @@
     }
     .modalTop{
       display:flex; align-items:center; justify-content:space-between;
-      gap: 12px;
-      padding: 12px 14px;
+      gap: 10px;
+      padding: 10px 12px;
       color: rgba(255,255,255,.92);
-      font: 14px system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      font: 13px system-ui, -apple-system, Segoe UI, Roboto, Arial;
       border-bottom: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.04);
     }
@@ -96,14 +98,14 @@
     }
 
     .toast {
-      position: fixed; right: 14px; bottom: 14px; z-index: 70;
+      position: fixed; right: 12px; bottom: 12px; z-index: 70;
       background: rgba(0,0,0,.45);
       border: 1px solid rgba(255,255,255,.12);
       color: rgba(255,255,255,.92);
       padding: 10px 12px;
       border-radius: 14px;
       backdrop-filter: blur(10px);
-      font: 13px system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      font: 12px system-ui, -apple-system, Segoe UI, Roboto, Arial;
       opacity: 0;
       transform: translateY(10px);
       transition: opacity .2s ease, transform .2s ease;
@@ -112,40 +114,104 @@
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
-    .errorBox {
-      position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);
-      z-index: 999;
-      display:none;
-      width: min(980px, 92vw);
-      background: rgba(0,0,0,.75);
-      border: 1px solid rgba(255,80,120,.45);
-      color: rgba(255,255,255,.95);
-      padding: 14px 16px;
-      border-radius: 16px;
-      font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    /* Mobile touch controls */
+    .touchUI {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 25;
+    }
+    .pad {
+      position: absolute;
+      bottom: max(14px, env(safe-area-inset-bottom));
+      width: 42vw;
+      height: 32vh;
+      max-width: 260px;
+      max-height: 220px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(10px);
+      pointer-events: auto;
+      touch-action: none;
+      user-select: none;
+    }
+    .pad.left { left: max(14px, env(safe-area-inset-left)); }
+    .pad.right { right: max(14px, env(safe-area-inset-right)); }
+    .padLabel {
+      position:absolute; top:10px; left:12px;
+      color: rgba(255,255,255,.75);
+      font: 12px system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+    .stick {
+      position:absolute;
+      left: 50%; top: 50%;
+      width: 64px; height: 64px;
+      margin-left:-32px; margin-top:-32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+      transform: translate(0,0);
+    }
+    .btnBar {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      z-index: 26;
+      display:flex;
+      gap: 10px;
+    }
+    .uiBtn {
+      pointer-events:auto;
+      border:none;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.92);
+      font-weight: 900;
+      font: 13px system-ui, -apple-system, Segoe UI, Roboto, Arial;
       backdrop-filter: blur(10px);
     }
-    .errorBox.show { display:block; }
-    .errorBox b { color: #ff547a; }
+    .uiBtn.primary {
+      background: rgba(255,59,107,.92);
+      border-color: rgba(255,59,107,.35);
+    }
+    @media (hover:hover) and (pointer:fine){
+      /* On desktop, make touch pads smaller / less visible */
+      .pad { opacity: .35; }
+    }
   </style>
 </head>
 <body>
   <div class="hud">
-    <div><b>Museum Walk</b> — hold WASD + Roblox-ish camera</div>
+    <div><b>Museum Walk</b> — mobile ready</div>
     <div class="hint">
-      Move: <b>Hold W A S D</b> • Sprint: <b>Shift</b> • Auto-run toggle: <b>R</b><br/>
-      Camera: <b>Hold LMB</b> drag • Zoom: <b>Scroll</b> • Roblox mouse-lock: <b>Hold RMB</b><br/>
-      View frame: <b>E</b> near a photo
+      Mobile: <b>Left pad</b> move • <b>Right pad</b> look • <b>View</b> near frame<br/>
+      PC: hold <b>WASD</b> • <b>Shift</b> sprint • <b>R</b> autorun • <b>E</b> view
+    </div>
+  </div>
+
+  <div class="btnBar">
+    <button class="uiBtn primary" id="viewBtn">View Frame</button>
+    <button class="uiBtn" id="runBtn">Auto-run</button>
+  </div>
+
+  <div class="touchUI">
+    <div class="pad left" id="movePad">
+      <div class="padLabel">MOVE</div>
+      <div class="stick" id="moveStick"></div>
+    </div>
+    <div class="pad right" id="lookPad">
+      <div class="padLabel">LOOK</div>
+      <div class="stick" id="lookStick"></div>
     </div>
   </div>
 
   <div class="overlay" id="overlay">
     <div class="overlayCard">
-      <h1>Click START to enter the museum</h1>
-      <p>CDN mode ✅ (works even if you open the HTML directly)</p>
-      <p style="font-size:13px;opacity:.85">
-        Needs internet (for Three.js + photos). If you want fully offline, we can embed everything.
-      </p>
+      <h1>Tap START to enter the museum</h1>
+      <p>iPhone/Android friendly ✅</p>
       <button class="startBtn" id="startBtn">START ✨</button>
     </div>
   </div>
@@ -153,7 +219,7 @@
   <div class="modal" id="modal">
     <div class="modalCard">
       <div class="modalTop">
-        <div><b>Gallery View</b> — Press <b>Esc</b> to close</div>
+        <div><b>Gallery View</b></div>
         <button class="closeBtn" id="closeBtn">Close ✕</button>
       </div>
       <img class="modalImg" id="modalImg" alt="Selected frame" />
@@ -163,21 +229,12 @@
   <div class="toast" id="toast"></div>
   <div class="errorBox" id="errorBox"></div>
 
-  <!-- ✅ CDN (NON-MODULE) — pinned to r149 to avoid the r150+ deprecation warning -->
+  <!-- CDN (NON-MODULE) -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 
   <script>
-    // ============================================================
-    // ✅ PUT YOUR PHOTOS HERE (use direct image URLs)
-    // ============================================================
+    // Replace with YOUR real photo links (public direct image URLs)
     const PHOTO_URLS = [
-      // Replace with your own (public) image URLs:
-      // "https://your-site.com/us1.jpg",
-      // "https://your-site.com/us2.jpg",
-      // "https://your-site.com/us3.jpg",
-      // "https://your-site.com/us4.jpg",
-
-      // placeholders:
       "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=1400&h=900&fit=crop",
       "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=1400&h=900&fit=crop",
       "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1400&h=900&fit=crop",
@@ -186,9 +243,6 @@
       "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1400&h=900&fit=crop",
     ];
 
-    // ============================================================
-    // ✅ TAGALOG FUNNY VALENTINE WALL
-    // ============================================================
     const LOVE_TITLE = "HAPPY VALENTINE’S, LOVE 💖";
     const LOVE_LINES = [
       "Ikaw ang paborito kong notification…",
@@ -197,7 +251,7 @@
       "Mas mahal kita kaysa sa",
       "“git push” na walang conflicts 😭",
       "",
-      "P.S. Auto-run ON para sa’yo 🏃‍♀️💘"
+      "P.S. Kung may lag, ikaw pa rin ang love ko 💘"
     ];
 
     const overlay = document.getElementById("overlay");
@@ -206,83 +260,154 @@
     const modalImg = document.getElementById("modalImg");
     const closeBtn = document.getElementById("closeBtn");
     const toast = document.getElementById("toast");
-    const errorBox = document.getElementById("errorBox");
+
+    const viewBtn = document.getElementById("viewBtn");
+    const runBtn = document.getElementById("runBtn");
 
     function showToast(msg) {
       toast.textContent = msg;
       toast.classList.add("show");
       clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => toast.classList.remove("show"), 1500);
-    }
-    function escapeHtml(s){
-      return String(s).replace(/[&<>"']/g, (c) => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-      }[c]));
-    }
-    function showError(msg) {
-      errorBox.innerHTML = `<b>ERROR:</b> ${escapeHtml(msg)}`;
-      errorBox.classList.add("show");
+      showToast._t = setTimeout(() => toast.classList.remove("show"), 1400);
     }
 
-    function openModal(url){ modalImg.src = url; modal.classList.add("show"); }
-    function closeModal(){ modal.classList.remove("show"); modalImg.src = ""; }
+    function openModal(url){
+      modalImg.src = url;
+      modal.classList.add("show");
+    }
+    function closeModal(){
+      modal.classList.remove("show");
+      modalImg.src = "";
+    }
     closeBtn.addEventListener("click", closeModal);
     modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
-    window.addEventListener("keydown", (e) => { if (e.code === "Escape") closeModal(); }, true);
 
-    // Hold input
+    // Keyboard input (desktop)
     const pressed = new Set();
-    function armInput() {
+    function armKeyboard(){
       window.addEventListener("keydown", (e) => {
         if (["KeyW","KeyA","KeyS","KeyD","ShiftLeft","ShiftRight","KeyE","KeyR"].includes(e.code)) e.preventDefault();
         pressed.add(e.code);
       }, { capture:true, passive:false });
-
       window.addEventListener("keyup", (e) => {
         if (["KeyW","KeyA","KeyS","KeyD","ShiftLeft","ShiftRight","KeyE","KeyR"].includes(e.code)) e.preventDefault();
         pressed.delete(e.code);
       }, { capture:true, passive:false });
-
       window.addEventListener("blur", () => pressed.clear());
       document.addEventListener("visibilitychange", () => { if (document.hidden) pressed.clear(); });
     }
 
-    // Wrap-safe angle lerp (no THREE.MathUtils extras needed)
-    function wrapAngleRad(x) {
+    // Touch joystick helpers
+    function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+    function vecLen(x,y){ return Math.hypot(x,y); }
+
+    function createPad(padEl, stickEl){
+      let active = false;
+      let id = null;
+      let cx = 0, cy = 0;
+      let dx = 0, dy = 0;
+
+      function reset(){
+        dx = dy = 0;
+        stickEl.style.transform = "translate(0px,0px)";
+      }
+
+      function onDown(e){
+        active = true;
+        const t = (e.changedTouches ? e.changedTouches[0] : e);
+        id = t.identifier ?? "mouse";
+        const r = padEl.getBoundingClientRect();
+        cx = r.left + r.width/2;
+        cy = r.top + r.height/2;
+        onMove(e);
+      }
+
+      function onMove(e){
+        if(!active) return;
+        let t = null;
+        if(e.changedTouches){
+          for(const tt of e.changedTouches){
+            if((tt.identifier ?? "mouse") === id){ t = tt; break; }
+          }
+          if(!t) return;
+        } else t = e;
+
+        const r = padEl.getBoundingClientRect();
+        const maxR = Math.min(r.width, r.height) * 0.30; // stick range
+        const x = t.clientX - cx;
+        const y = t.clientY - cy;
+
+        const L = vecLen(x,y);
+        const nx = (L > maxR) ? (x / L) * maxR : x;
+        const ny = (L > maxR) ? (y / L) * maxR : y;
+
+        dx = clamp(nx / maxR, -1, 1);
+        dy = clamp(ny / maxR, -1, 1);
+
+        stickEl.style.transform = `translate(${nx}px,${ny}px)`;
+      }
+
+      function onUp(e){
+        if(!active) return;
+        if(e.changedTouches){
+          for(const tt of e.changedTouches){
+            if((tt.identifier ?? "mouse") === id){
+              active = false; id = null; reset();
+              return;
+            }
+          }
+        } else {
+          active = false; id = null; reset();
+        }
+      }
+
+      padEl.addEventListener("touchstart", (e)=>{ e.preventDefault(); onDown(e); }, {passive:false});
+      padEl.addEventListener("touchmove",  (e)=>{ e.preventDefault(); onMove(e); }, {passive:false});
+      padEl.addEventListener("touchend",   (e)=>{ e.preventDefault(); onUp(e); }, {passive:false});
+      padEl.addEventListener("touchcancel",(e)=>{ e.preventDefault(); onUp(e); }, {passive:false});
+
+      // mouse fallback
+      padEl.addEventListener("mousedown", (e)=>{ e.preventDefault(); onDown(e); }, {passive:false});
+      window.addEventListener("mousemove", (e)=>{ onMove(e); }, {passive:true});
+      window.addEventListener("mouseup", (e)=>{ onUp(e); }, {passive:true});
+
+      return { get dx(){return dx;}, get dy(){return dy;} };
+    }
+
+    // Angle helpers
+    function wrapAngleRad(x){
       const pi2 = Math.PI * 2;
       x = (x + Math.PI) % pi2;
       if (x < 0) x += pi2;
       return x - Math.PI;
     }
-    function lerpAngle(a, b, t) {
+    function lerpAngle(a,b,t){
       const diff = wrapAngleRad(b - a);
       return a + diff * t;
     }
-    function dampAlpha(dt, tau) { return 1 - Math.exp(-dt / Math.max(0.0001, tau)); }
-
-    // Error catcher (avoids silent black screen)
-    window.addEventListener("error", (e) => showError(e.message || e.error || "Unknown error"));
-    window.addEventListener("unhandledrejection", (e) => showError(e.reason || "Unhandled promise rejection"));
+    function dampAlpha(dt, tau){ return 1 - Math.exp(-dt / Math.max(0.0001, tau)); }
 
     let started = false;
-    startBtn.addEventListener("click", () => {
-      if (started) return;
+
+    startBtn.addEventListener("click", startFlow);
+    startBtn.addEventListener("touchend", (e)=>{ e.preventDefault(); startFlow(); }, {passive:false});
+
+    function startFlow(){
+      if(started) return;
       started = true;
 
-      if (!window.THREE) {
+      if(!window.THREE){
         overlay.style.display = "none";
-        showError("THREE is undefined. CDN failed to load (no internet / blocked CDN).");
+        alert("Three.js failed to load. Check internet / CDN blocked.");
         return;
       }
 
       overlay.style.display = "none";
-      armInput();
+      armKeyboard();
+      initAndRun();
+    }
 
-      try { initAndRun(); }
-      catch (err) { showError(err?.stack || err?.message || String(err)); }
-    });
-
-    function makeLoveTexture() {
+    function makeLoveTexture(){
       const c = document.createElement("canvas");
       c.width = 1400; c.height = 520;
       const ctx = c.getContext("2d");
@@ -299,7 +424,7 @@
 
       ctx.globalAlpha = 0.12;
       ctx.font = "80px system-ui";
-      for (let i=0;i<14;i++) ctx.fillText("💖", 80 + i*90, 110 + (i%2)*70);
+      for(let i=0;i<14;i++) ctx.fillText("💖", 80 + i*90, 110 + (i%2)*70);
       ctx.globalAlpha = 1;
 
       ctx.fillStyle = "#ff2f67";
@@ -310,281 +435,144 @@
       ctx.fillStyle = "#2b1a1f";
       ctx.font = "600 44px system-ui";
       let y = 200;
-      for (const line of LOVE_LINES) { ctx.fillText(line, c.width/2, y); y += 54; }
+      for(const line of LOVE_LINES){ ctx.fillText(line, c.width/2, y); y += 54; }
 
-      const tex = new THREE.CanvasTexture(c);
-      return tex;
+      return new THREE.CanvasTexture(c);
     }
 
-    function initAndRun() {
+    function initAndRun(){
       const scene = new THREE.Scene();
       scene.fog = new THREE.Fog(0x0b0b10, 22, 90);
 
       const baseFov = 65, runFov = 74;
-      const camera = new THREE.PerspectiveCamera(baseFov, innerWidth / innerHeight, 0.1, 220);
+      const camera = new THREE.PerspectiveCamera(baseFov, innerWidth/innerHeight, 0.1, 220);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      const renderer = new THREE.WebGLRenderer({ antialias:true });
       renderer.setSize(innerWidth, innerHeight);
       renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
       renderer.setClearColor(0x0b0b10, 1);
       document.body.appendChild(renderer.domElement);
-
-      renderer.domElement.tabIndex = 0;
-      renderer.domElement.focus();
-      renderer.domElement.addEventListener("pointerdown", () => renderer.domElement.focus());
-      renderer.domElement.oncontextmenu = (e) => e.preventDefault();
+      renderer.domElement.oncontextmenu = (e)=>e.preventDefault();
 
       scene.add(new THREE.HemisphereLight(0xffffff, 0x1b1b2a, 0.9));
       const key = new THREE.DirectionalLight(0xffffff, 0.9);
-      key.position.set(10, 16, 10);
+      key.position.set(10,16,10);
       scene.add(key);
 
-      function addSpot(x, z) {
-        const s = new THREE.SpotLight(0xffffff, 1.0, 28, Math.PI * 0.22, 0.55, 1.2);
+      function addSpot(x,z){
+        const s = new THREE.SpotLight(0xffffff, 1.0, 28, Math.PI*0.22, 0.55, 1.2);
         s.position.set(x, 7.6, z);
         s.target.position.set(x, 2.0, z);
-        scene.add(s);
-        scene.add(s.target);
+        scene.add(s); scene.add(s.target);
       }
 
-      // Rooms
-      const roomW = 28, roomD = 16, wallH = 6, wallT = 0.4;
-      const roomA_Z = 0;
-      const hallW = 8, hallD = 10;
-      const hall_Z = -(roomD/2 + hallD/2);
-      const roomB_Z = -(roomD + hallD);
+      // Museum geometry
+      const roomW=28, roomD=16, wallH=6, wallT=0.4;
+      const roomA_Z=0;
+      const hallW=8, hallD=10;
+      const hall_Z=-(roomD/2 + hallD/2);
+      const roomB_Z=-(roomD + hallD);
 
       const colliders = [];
 
-      function addFloor(w, d, zCenter) {
+      function floor(w,d,z){
         const f = new THREE.Mesh(
-          new THREE.PlaneGeometry(w, d),
-          new THREE.MeshStandardMaterial({ color: 0x1a1a22, roughness: 0.88, metalness: 0.05 })
+          new THREE.PlaneGeometry(w,d),
+          new THREE.MeshStandardMaterial({ color:0x1a1a22, roughness:0.88, metalness:0.05 })
         );
-        f.rotation.x = -Math.PI / 2;
-        f.position.z = zCenter;
+        f.rotation.x = -Math.PI/2;
+        f.position.z = z;
         scene.add(f);
       }
-      addFloor(roomW, roomD, roomA_Z);
-      addFloor(hallW, hallD, hall_Z);
-      addFloor(roomW, roomD, roomB_Z);
+      floor(roomW, roomD, roomA_Z);
+      floor(hallW, hallD, hall_Z);
+      floor(roomW, roomD, roomB_Z);
 
-      const wallMat = new THREE.MeshStandardMaterial({ color: 0xf3eef2, roughness: 0.96 });
+      const wallMat = new THREE.MeshStandardMaterial({ color:0xf3eef2, roughness:0.96 });
 
-      function addWall(w, h, d, x, y, z) {
-        const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
-        m.position.set(x, y, z);
+      function wall(w,h,d,x,y,z){
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), wallMat);
+        m.position.set(x,y,z);
         scene.add(m);
         colliders.push(m);
       }
-      function addCeil(w, d, zCenter) {
+      function ceil(w,d,z){
         const c = new THREE.Mesh(
-          new THREE.PlaneGeometry(w, d),
-          new THREE.MeshStandardMaterial({ color: 0xf7f1f6, roughness: 1.0 })
+          new THREE.PlaneGeometry(w,d),
+          new THREE.MeshStandardMaterial({ color:0xf7f1f6, roughness:1.0 })
         );
-        c.position.set(0, wallH, zCenter);
-        c.rotation.x = Math.PI / 2;
+        c.position.set(0, wallH, z);
+        c.rotation.x = Math.PI/2;
         scene.add(c);
       }
 
       const doorW = hallW;
-      const sideW = (roomW - doorW) / 2;
+      const sideW = (roomW - doorW)/2;
 
       // Room A (door at back)
-      addWall(roomW, wallH, wallT, 0, wallH/2, roomA_Z + roomD/2);
-      addWall(wallT, wallH, roomD, -roomW/2, wallH/2, roomA_Z);
-      addWall(wallT, wallH, roomD,  roomW/2, wallH/2, roomA_Z);
-      addWall(sideW, wallH, wallT, -(doorW/2 + sideW/2), wallH/2, roomA_Z - roomD/2);
-      addWall(sideW, wallH, wallT, +(doorW/2 + sideW/2), wallH/2, roomA_Z - roomD/2);
-      addCeil(roomW, roomD, roomA_Z);
+      wall(roomW, wallH, wallT, 0, wallH/2, roomA_Z + roomD/2);
+      wall(wallT, wallH, roomD, -roomW/2, wallH/2, roomA_Z);
+      wall(wallT, wallH, roomD,  roomW/2, wallH/2, roomA_Z);
+      wall(sideW, wallH, wallT, -(doorW/2 + sideW/2), wallH/2, roomA_Z - roomD/2);
+      wall(sideW, wallH, wallT, +(doorW/2 + sideW/2), wallH/2, roomA_Z - roomD/2);
+      ceil(roomW, roomD, roomA_Z);
 
       // Hall
-      addWall(hallW, wallH, wallT, 0, wallH/2, hall_Z + hallD/2);
-      addWall(hallW, wallH, wallT, 0, wallH/2, hall_Z - hallD/2);
-      addWall(wallT, wallH, hallD, -hallW/2, wallH/2, hall_Z);
-      addWall(wallT, wallH, hallD,  hallW/2, wallH/2, hall_Z);
-      addCeil(hallW, hallD, hall_Z);
+      wall(hallW, wallH, wallT, 0, wallH/2, hall_Z + hallD/2);
+      wall(hallW, wallH, wallT, 0, wallH/2, hall_Z - hallD/2);
+      wall(wallT, wallH, hallD, -hallW/2, wallH/2, hall_Z);
+      wall(wallT, wallH, hallD,  hallW/2, wallH/2, hall_Z);
+      ceil(hallW, hallD, hall_Z);
 
       // Room B (door at front)
-      addWall(roomW, wallH, wallT, 0, wallH/2, roomB_Z - roomD/2);
-      addWall(wallT, wallH, roomD, -roomW/2, wallH/2, roomB_Z);
-      addWall(wallT, wallH, roomD,  roomW/2, wallH/2, roomB_Z);
-      addWall(sideW, wallH, wallT, -(doorW/2 + sideW/2), wallH/2, roomB_Z + roomD/2);
-      addWall(sideW, wallH, wallT, +(doorW/2 + sideW/2), wallH/2, roomB_Z + roomD/2);
-      addCeil(roomW, roomD, roomB_Z);
+      wall(roomW, wallH, wallT, 0, wallH/2, roomB_Z - roomD/2);
+      wall(wallT, wallH, roomD, -roomW/2, wallH/2, roomB_Z);
+      wall(wallT, wallH, roomD,  roomW/2, wallH/2, roomB_Z);
+      wall(sideW, wallH, wallT, -(doorW/2 + sideW/2), wallH/2, roomB_Z + roomD/2);
+      wall(sideW, wallH, wallT, +(doorW/2 + sideW/2), wallH/2, roomB_Z + roomD/2);
+      ceil(roomW, roomD, roomB_Z);
 
-      // Lights
+      // Spots
       addSpot(-7, roomA_Z - 4); addSpot(0, roomA_Z - 4); addSpot(7, roomA_Z - 4);
       addSpot(-7, roomA_Z + 4); addSpot(0, roomA_Z + 4); addSpot(7, roomA_Z + 4);
       addSpot(0, hall_Z);
       addSpot(-7, roomB_Z - 4); addSpot(0, roomB_Z - 4); addSpot(7, roomB_Z - 4);
       addSpot(-7, roomB_Z + 4); addSpot(0, roomB_Z + 4); addSpot(7, roomB_Z + 4);
 
-      // Girl character
+      // Character (girl)
       const player = new THREE.Group();
       scene.add(player);
 
-      const skinMat  = new THREE.MeshStandardMaterial({ color: 0xffd4c2, roughness: 0.85 });
-      const hairMat  = new THREE.MeshStandardMaterial({ color: 0x24140f, roughness: 0.9 });
-      const dressMat = new THREE.MeshStandardMaterial({ color: 0xff3b6b, roughness: 0.7 });
-      const shoeMat  = new THREE.MeshStandardMaterial({ color: 0x22222a, roughness: 0.6 });
+      const skin  = new THREE.MeshStandardMaterial({ color:0xffd4c2, roughness:0.85 });
+      const hair  = new THREE.MeshStandardMaterial({ color:0x24140f, roughness:0.9 });
+      const dress = new THREE.MeshStandardMaterial({ color:0xff3b6b, roughness:0.7 });
+      const shoe  = new THREE.MeshStandardMaterial({ color:0x22222a, roughness:0.6 });
 
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 24, 24), skinMat);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 24, 24), skin);
       head.position.set(0, 1.55, 0); player.add(head);
 
-      const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.37, 24, 24, 0, Math.PI*2, 0, Math.PI*0.65), hairMat);
+      const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.37, 24, 24, 0, Math.PI*2, 0, Math.PI*0.65), hair);
       hairCap.position.copy(head.position); hairCap.position.y += 0.05; player.add(hairCap);
 
-      const pony = new THREE.Mesh(new THREE.SphereGeometry(0.20, 20, 20), hairMat);
+      const pony = new THREE.Mesh(new THREE.SphereGeometry(0.20, 20, 20), hair);
       pony.position.set(0.22, 1.42, -0.18); player.add(pony);
 
-      const dress = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.55, 0.9, 18), dressMat);
-      dress.position.set(0, 0.95, 0); player.add(dress);
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.55, 0.9, 18), dress);
+      body.position.set(0, 0.95, 0); player.add(body);
 
       const armGeo = new THREE.CapsuleGeometry(0.11, 0.42, 6, 10);
-      const leftArm = new THREE.Mesh(armGeo, skinMat); leftArm.position.set(-0.55, 1.05, 0); player.add(leftArm);
-      const rightArm = new THREE.Mesh(armGeo, skinMat); rightArm.position.set(0.55, 1.05, 0); player.add(rightArm);
+      const la = new THREE.Mesh(armGeo, skin); la.position.set(-0.55, 1.05, 0); player.add(la);
+      const ra = new THREE.Mesh(armGeo, skin); ra.position.set(0.55, 1.05, 0); player.add(ra);
 
       const legGeo = new THREE.CapsuleGeometry(0.12, 0.5, 6, 10);
-      const leftLeg = new THREE.Mesh(legGeo, skinMat); leftLeg.position.set(-0.18, 0.35, 0); player.add(leftLeg);
-      const rightLeg = new THREE.Mesh(legGeo, skinMat); rightLeg.position.set(0.18, 0.35, 0); player.add(rightLeg);
+      const ll = new THREE.Mesh(legGeo, skin); ll.position.set(-0.18, 0.35, 0); player.add(ll);
+      const rl = new THREE.Mesh(legGeo, skin); rl.position.set(0.18, 0.35, 0); player.add(rl);
 
       const shoeGeo = new THREE.BoxGeometry(0.22, 0.10, 0.32);
-      const leftShoe = new THREE.Mesh(shoeGeo, shoeMat); leftShoe.position.set(-0.18, 0.05, 0.08); player.add(leftShoe);
-      const rightShoe = new THREE.Mesh(shoeGeo, shoeMat); rightShoe.position.set(0.18, 0.05, 0.08); player.add(rightShoe);
+      const ls = new THREE.Mesh(shoeGeo, shoe); ls.position.set(-0.18, 0.05, 0.08); player.add(ls);
+      const rs = new THREE.Mesh(shoeGeo, shoe); rs.position.set(0.18, 0.05, 0.08); player.add(rs);
 
       player.position.set(0, 0, roomA_Z + 3);
-
-      // Camera controls
-      let yaw = Math.PI;
-      let pitch = 0.28;
-      let distance = 10.5;
-      const minDist = 5.0, maxDist = 16.0;
-      const minPitch = 0.08, maxPitch = 1.05;
-
-      let draggingL = false;
-      let mouseLock = false;
-      let lastX = 0, lastY = 0;
-
-      renderer.domElement.addEventListener("mousedown", (e) => {
-        if (e.button === 0) { draggingL = true; lastX = e.clientX; lastY = e.clientY; }
-        if (e.button === 2) { mouseLock = true; lastX = e.clientX; lastY = e.clientY; showToast("Mouse-lock: ON (hold RMB)"); }
-      });
-      window.addEventListener("mouseup", (e) => {
-        if (e.button === 0) draggingL = false;
-        if (e.button === 2) { mouseLock = false; showToast("Mouse-lock: OFF"); }
-      });
-      window.addEventListener("mousemove", (e) => {
-        const active = draggingL || mouseLock;
-        if (!active) return;
-
-        const dx = e.clientX - lastX;
-        const dy = e.clientY - lastY;
-        lastX = e.clientX; lastY = e.clientY;
-
-        yaw   -= dx * 0.006;
-        pitch -= dy * 0.004;
-        pitch = Math.max(minPitch, Math.min(maxPitch, pitch));
-
-        if (mouseLock) player.rotation.y = yaw;
-      });
-      window.addEventListener("wheel", (e) => {
-        distance += e.deltaY * 0.0035;
-        distance = Math.max(minDist, Math.min(maxDist, distance));
-      }, { passive:true });
-
-      // Camera collision
-      const camTarget = new THREE.Vector3();
-      const desiredCamPos = new THREE.Vector3();
-      const finalCamPos = new THREE.Vector3();
-      const raycaster = new THREE.Raycaster();
-      const camDir = new THREE.Vector3();
-      const camSafety = 0.35;
-      const camUpOffset = 1.0;
-
-      function applyCameraCollision(target, desiredPos) {
-        camDir.copy(desiredPos).sub(target);
-        const dist = camDir.length();
-        if (dist < 0.001) return desiredPos;
-
-        camDir.normalize();
-        raycaster.set(target, camDir);
-        raycaster.far = dist;
-
-        const hits = raycaster.intersectObjects(colliders, false);
-        if (hits.length > 0) {
-          const hitDist = Math.max(0.7, hits[0].distance - camSafety);
-          return finalCamPos.copy(target).addScaledVector(camDir, hitDist);
-        }
-        return desiredPos;
-      }
-
-      // Frames
-      const texLoader = new THREE.TextureLoader();
-      texLoader.crossOrigin = "anonymous";
-      const framePlanes = [];
-
-      function makeFrame(texture, x, y, z, rotY, url) {
-        const group = new THREE.Group();
-        group.position.set(x, y, z);
-        group.rotation.y = rotY;
-
-        const frame = new THREE.Mesh(
-          new THREE.BoxGeometry(2.6, 1.7, 0.08),
-          new THREE.MeshStandardMaterial({ color: 0x2b1a1f, roughness: 0.7, metalness: 0.1 })
-        );
-        frame.position.z = 0.02; group.add(frame);
-
-        const matte = new THREE.Mesh(
-          new THREE.BoxGeometry(2.35, 1.45, 0.02),
-          new THREE.MeshStandardMaterial({ color: 0xf5eff3, roughness: 1.0 })
-        );
-        matte.position.z = 0.065; group.add(matte);
-
-        const photo = new THREE.Mesh(
-          new THREE.PlaneGeometry(2.1, 1.2),
-          new THREE.MeshStandardMaterial({ map: texture, roughness: 0.9 })
-        );
-        photo.position.z = 0.085;
-        photo.userData.photoUrl = url;
-        framePlanes.push(photo);
-        group.add(photo);
-
-        scene.add(group);
-      }
-
-      function placeFramesForRoom(zCenter, offset) {
-        const frameY = 3.1;
-        const backZ  = zCenter - roomD/2 + 0.35;
-        const frontZ = zCenter + roomD/2 - 0.35;
-        const leftX  = -roomW/2 + 0.35;
-        const rightX =  roomW/2 - 0.35;
-
-        const placements = [
-          { x:-7, y:frameY, z:backZ,  rotY:0 },
-          { x: 0, y:frameY, z:backZ,  rotY:0 },
-          { x: 7, y:frameY, z:backZ,  rotY:0 },
-          { x:-7, y:frameY, z:frontZ, rotY:Math.PI },
-          { x: 0, y:frameY, z:frontZ, rotY:Math.PI },
-          { x: 7, y:frameY, z:frontZ, rotY:Math.PI },
-          { x:leftX,  y:frameY, z:zCenter-4, rotY: Math.PI/2 },
-          { x:leftX,  y:frameY, z:zCenter+4, rotY: Math.PI/2 },
-          { x:rightX, y:frameY, z:zCenter-4, rotY:-Math.PI/2 },
-          { x:rightX, y:frameY, z:zCenter+4, rotY:-Math.PI/2 },
-        ];
-
-        placements.forEach((p, i) => {
-          const url = PHOTO_URLS[(offset + i) % PHOTO_URLS.length];
-          texLoader.load(
-            url,
-            (tex) => makeFrame(tex, p.x, p.y, p.z, p.rotY, url),
-            undefined,
-            () => showToast("Some images blocked (try different direct image URLs)")
-          );
-        });
-      }
-      placeFramesForRoom(roomA_Z, 0);
-      placeFramesForRoom(roomB_Z, 4);
 
       // Love wall
       const loveTex = makeLoveTexture();
@@ -595,35 +583,182 @@
       loveWall.position.set(0, 3.05, roomB_Z - roomD/2 + 0.56);
       scene.add(loveWall);
 
-      function nearestFrame(maxDist = 2.9) {
-        let best = null, bestD = Infinity;
+      // Frames
+      const loader = new THREE.TextureLoader();
+      loader.crossOrigin = "anonymous";
+      const framePlanes = [];
+
+      function makeFrame(texture, x,y,z, rotY, url){
+        const g = new THREE.Group();
+        g.position.set(x,y,z);
+        g.rotation.y = rotY;
+
+        const frame = new THREE.Mesh(
+          new THREE.BoxGeometry(2.6,1.7,0.08),
+          new THREE.MeshStandardMaterial({ color:0x2b1a1f, roughness:0.7, metalness:0.1 })
+        );
+        frame.position.z = 0.02; g.add(frame);
+
+        const matte = new THREE.Mesh(
+          new THREE.BoxGeometry(2.35,1.45,0.02),
+          new THREE.MeshStandardMaterial({ color:0xf5eff3, roughness:1.0 })
+        );
+        matte.position.z = 0.065; g.add(matte);
+
+        const photo = new THREE.Mesh(
+          new THREE.PlaneGeometry(2.1,1.2),
+          new THREE.MeshStandardMaterial({ map: texture, roughness:0.9 })
+        );
+        photo.position.z = 0.085;
+        photo.userData.photoUrl = url;
+        framePlanes.push(photo);
+        g.add(photo);
+
+        scene.add(g);
+      }
+
+      function placeFrames(zCenter, offset){
+        const frameY=3.1;
+        const backZ=zCenter-roomD/2+0.35, frontZ=zCenter+roomD/2-0.35;
+        const leftX=-roomW/2+0.35, rightX=roomW/2-0.35;
+
+        const ps = [
+          {x:-7,y:frameY,z:backZ, rotY:0},
+          {x: 0,y:frameY,z:backZ, rotY:0},
+          {x: 7,y:frameY,z:backZ, rotY:0},
+          {x:-7,y:frameY,z:frontZ,rotY:Math.PI},
+          {x: 0,y:frameY,z:frontZ,rotY:Math.PI},
+          {x: 7,y:frameY,z:frontZ,rotY:Math.PI},
+          {x:-roomW/2+0.35, y:frameY,z:zCenter-4, rotY: Math.PI/2},
+          {x:-roomW/2+0.35, y:frameY,z:zCenter+4, rotY: Math.PI/2},
+          {x: roomW/2-0.35, y:frameY,z:zCenter-4, rotY:-Math.PI/2},
+          {x: roomW/2-0.35, y:frameY,z:zCenter+4, rotY:-Math.PI/2},
+        ];
+
+        ps.forEach((p,i)=>{
+          const url = PHOTO_URLS[(offset+i)%PHOTO_URLS.length];
+          loader.load(url, (tex)=>makeFrame(tex,p.x,p.y,p.z,p.rotY,url));
+        });
+      }
+      placeFrames(roomA_Z, 0);
+      placeFrames(roomB_Z, 4);
+
+      function nearestFrame(maxDist=2.9){
+        let best=null, bestD=Infinity;
         const p = new THREE.Vector3(player.position.x, 1.35, player.position.z);
-        for (const pl of framePlanes) {
-          const wp = new THREE.Vector3();
-          pl.getWorldPosition(wp);
-          const d = wp.distanceTo(p);
-          if (d < bestD && d <= maxDist) { bestD = d; best = pl; }
+        for(const pl of framePlanes){
+          const wp=new THREE.Vector3(); pl.getWorldPosition(wp);
+          const d=wp.distanceTo(p);
+          if(d < bestD && d <= maxDist){ bestD=d; best=pl; }
         }
         return best;
       }
 
-      // Movement (holdable)
-      const velocity = new THREE.Vector3();
-      const targetVel = new THREE.Vector3();
-      const tmpForward = new THREE.Vector3();
-      const tmpRight = new THREE.Vector3();
-      const wishDir = new THREE.Vector3();
+      // Touch pads
+      const movePad = createPad(
+        document.getElementById("movePad"),
+        document.getElementById("moveStick")
+      );
+      const lookPad = createPad(
+        document.getElementById("lookPad"),
+        document.getElementById("lookStick")
+      );
 
-      const WALK_SPEED = 10.5;
-      const RUN_SPEED  = 17.0;
-      const ACCEL_TAU  = 0.04;
-      const BRAKE_TAU  = 0.055;
-      const ROT_SMOOTH = 26.0;
-
-      let walkPhase = 0;
-      let eLatch = false;
-      let rLatch = false;
+      // Buttons
       let autoRun = false;
+      runBtn.addEventListener("click", ()=>{ autoRun=!autoRun; runBtn.textContent = autoRun ? "Auto-run ✓" : "Auto-run"; showToast(autoRun ? "Auto-run ON ✅" : "Auto-run OFF ❎"); });
+      viewBtn.addEventListener("click", ()=> {
+        if(modal.classList.contains("show")) return;
+        const f = nearestFrame(2.9);
+        if(f?.userData?.photoUrl) openModal(f.userData.photoUrl);
+        else showToast("Lapitan mo yung frame ✨");
+      });
+
+      // Camera orbit
+      let yaw = Math.PI, pitch = 0.28, dist = 10.5;
+      const minDist=5, maxDist=16, minPitch=0.08, maxPitch=1.05;
+
+      // Right pad = look (touch)
+      // dx = left/right, dy = up/down
+      const LOOK_SENS = 2.4; // mobile feel
+      const ZOOM_SENS = 0.02;
+
+      // Pinch zoom (simple)
+      let pinchActive=false, pinchStart=0, pinchDist=0;
+      function touchDist(t1,t2){
+        const dx=t1.clientX-t2.clientX, dy=t1.clientY-t2.clientY;
+        return Math.hypot(dx,dy);
+      }
+      window.addEventListener("touchstart",(e)=>{
+        if(e.touches && e.touches.length===2){
+          pinchActive=true;
+          pinchDist = touchDist(e.touches[0], e.touches[1]);
+          pinchStart = dist;
+        }
+      }, {passive:true});
+      window.addEventListener("touchmove",(e)=>{
+        if(pinchActive && e.touches && e.touches.length===2){
+          const d0 = touchDist(e.touches[0], e.touches[1]);
+          const delta = (pinchDist - d0) * ZOOM_SENS;
+          dist = clamp(pinchStart + delta, minDist, maxDist);
+        }
+      }, {passive:true});
+      window.addEventListener("touchend",(e)=>{
+        if(!e.touches || e.touches.length<2) pinchActive=false;
+      }, {passive:true});
+
+      // Desktop mouse drag (optional)
+      let draggingL=false, lastX=0, lastY=0;
+      renderer.domElement.addEventListener("mousedown",(e)=>{
+        if(e.button===0){ draggingL=true; lastX=e.clientX; lastY=e.clientY; }
+      });
+      window.addEventListener("mouseup",()=> draggingL=false);
+      window.addEventListener("mousemove",(e)=>{
+        if(!draggingL) return;
+        const dx=e.clientX-lastX, dy=e.clientY-lastY;
+        lastX=e.clientX; lastY=e.clientY;
+        yaw -= dx*0.006;
+        pitch -= dy*0.004;
+        pitch = clamp(pitch, minPitch, maxPitch);
+      });
+      window.addEventListener("wheel",(e)=>{
+        dist += e.deltaY*0.0035;
+        dist = clamp(dist, minDist, maxDist);
+      }, {passive:true});
+
+      // Camera collision
+      const camTarget=new THREE.Vector3();
+      const desiredCam=new THREE.Vector3();
+      const finalCam=new THREE.Vector3();
+      const raycaster=new THREE.Raycaster();
+      const camDir=new THREE.Vector3();
+      const camSafety=0.35;
+      const camUpOffset=1.0;
+
+      function applyCamCollision(target, desiredPos){
+        camDir.copy(desiredPos).sub(target);
+        const d = camDir.length();
+        if(d < 0.001) return desiredPos;
+        camDir.normalize();
+        raycaster.set(target, camDir);
+        raycaster.far = d;
+        const hits = raycaster.intersectObjects(colliders,false);
+        if(hits.length){
+          const hitDist = Math.max(0.7, hits[0].distance - camSafety);
+          return finalCam.copy(target).addScaledVector(camDir, hitDist);
+        }
+        return desiredPos;
+      }
+
+      // Movement
+      const vel = new THREE.Vector3();
+      const targetVel = new THREE.Vector3();
+      const tmpF = new THREE.Vector3();
+      const tmpR = new THREE.Vector3();
+      const wish = new THREE.Vector3();
+
+      const WALK=9.8, RUN=15.8, ACC=0.05, BRK=0.06, ROT=22.0;
+      let walkPhase=0;
 
       const bounds = {
         xMin: -roomW/2 + 1.2,
@@ -638,105 +773,120 @@
       renderer.render(scene, camera);
 
       const clock = new THREE.Clock();
-      function loop() {
+      function loop(){
         const dt = Math.min(clock.getDelta(), 0.033);
 
+        // Right pad look
+        // (stick values -1..1; multiply by dt for smooth)
+        yaw   -= lookPad.dx * LOOK_SENS * dt;
+        pitch -= lookPad.dy * (LOOK_SENS * 0.8) * dt;
+        pitch = clamp(pitch, minPitch, maxPitch);
+
         // basis from yaw
-        tmpForward.set(0,0,-1).applyAxisAngle(new THREE.Vector3(0,1,0), yaw);
-        tmpForward.y = 0; tmpForward.normalize();
-        tmpRight.copy(tmpForward).cross(new THREE.Vector3(0,1,0)).normalize();
+        tmpF.set(0,0,-1).applyAxisAngle(new THREE.Vector3(0,1,0), yaw);
+        tmpF.y=0; tmpF.normalize();
+        tmpR.copy(tmpF).cross(new THREE.Vector3(0,1,0)).normalize();
 
-        const w = pressed.has("KeyW");
-        const a = pressed.has("KeyA");
-        const s = pressed.has("KeyS");
-        const d = pressed.has("KeyD");
+        // Combine keyboard + left pad
+        const kw = pressed.has("KeyW");
+        const ka = pressed.has("KeyA");
+        const ks = pressed.has("KeyS");
+        const kd = pressed.has("KeyD");
         const shift = pressed.has("ShiftLeft") || pressed.has("ShiftRight");
-        const e = pressed.has("KeyE");
-        const r = pressed.has("KeyR");
+        const kAuto = pressed.has("KeyR");
+        const kView = pressed.has("KeyE");
 
-        if (r && !rLatch) { rLatch = true; autoRun = !autoRun; showToast(autoRun ? "Auto-run: ON ✅" : "Auto-run: OFF ❎"); }
-        if (!r) rLatch = false;
+        // Autorun toggle via keyboard
+        if(kAuto && !loop._rLatch){ loop._rLatch=true; autoRun=!autoRun; runBtn.textContent = autoRun ? "Auto-run ✓" : "Auto-run"; showToast(autoRun ? "Auto-run ON ✅" : "Auto-run OFF ❎"); }
+        if(!kAuto) loop._rLatch=false;
 
-        if (e && !eLatch && !modal.classList.contains("show")) {
-          eLatch = true;
+        // View via keyboard
+        if(kView && !loop._eLatch && !modal.classList.contains("show")){
+          loop._eLatch=true;
           const f = nearestFrame(2.9);
-          if (f && f.userData && f.userData.photoUrl) openModal(f.userData.photoUrl);
+          if(f?.userData?.photoUrl) openModal(f.userData.photoUrl);
           else showToast("Go closer to a frame ✨");
         }
-        if (!e) eLatch = false;
+        if(!kView) loop._eLatch=false;
 
-        wishDir.set(0,0,0);
-        if (autoRun) wishDir.add(tmpForward);
-        if (w) wishDir.add(tmpForward);
-        if (s) wishDir.sub(tmpForward);
-        if (d) wishDir.add(tmpRight);
-        if (a) wishDir.sub(tmpRight);
+        wish.set(0,0,0);
 
-        const hasInput = wishDir.lengthSq() > 0 && !modal.classList.contains("show");
+        // mobile pad (dy up = negative, so invert)
+        const padForward = -movePad.dy;
+        const padRight = movePad.dx;
 
-        // FOV smooth
-        const desiredFov = (shift && hasInput) ? runFov : baseFov;
-        camera.fov = camera.fov + (desiredFov - camera.fov) * (1 - Math.exp(-10 * dt));
+        // apply pad
+        wish.addScaledVector(tmpF, padForward);
+        wish.addScaledVector(tmpR, padRight);
+
+        // apply keyboard
+        if(autoRun) wish.add(tmpF);
+        if(kw) wish.add(tmpF);
+        if(ks) wish.sub(tmpF);
+        if(kd) wish.add(tmpR);
+        if(ka) wish.sub(tmpR);
+
+        const hasInput = wish.lengthSq()>0 && !modal.classList.contains("show");
+
+        const desiredFov = ((shift) && hasInput) ? runFov : baseFov;
+        camera.fov = camera.fov + (desiredFov - camera.fov) * (1 - Math.exp(-10*dt));
         camera.updateProjectionMatrix();
 
-        if (hasInput) {
-          wishDir.normalize();
-          const topSpeed = shift ? RUN_SPEED : WALK_SPEED;
-          targetVel.copy(wishDir).multiplyScalar(topSpeed);
-          velocity.lerp(targetVel, dampAlpha(dt, ACCEL_TAU));
+        const sprint = shift; // desktop sprint
+        const top = (sprint && hasInput) ? RUN : WALK;
 
-          // Face movement direction unless RMB mouse-lock
-          if (!mouseLock) {
-            const targetYaw = Math.atan2(wishDir.x, wishDir.z);
-            player.rotation.y = lerpAngle(player.rotation.y, targetYaw, 1 - Math.exp(-ROT_SMOOTH * dt));
-          }
+        if(hasInput){
+          wish.normalize();
+          targetVel.copy(wish).multiplyScalar(top);
+          vel.lerp(targetVel, dampAlpha(dt, ACC));
 
-          const speedNow = Math.hypot(velocity.x, velocity.z);
-          walkPhase += dt * (speedNow * 1.1);
+          // Face move direction (mobile/desktop)
+          const targetYaw = Math.atan2(wish.x, wish.z);
+          player.rotation.y = lerpAngle(player.rotation.y, targetYaw, 1 - Math.exp(-ROT*dt));
+
+          const sp = Math.hypot(vel.x, vel.z);
+          walkPhase += dt*(sp*1.1);
         } else {
           targetVel.set(0,0,0);
-          velocity.lerp(targetVel, dampAlpha(dt, BRAKE_TAU));
+          vel.lerp(targetVel, dampAlpha(dt, BRK));
         }
 
-        // subtle bob
-        const speedFactor = Math.min(1, Math.hypot(velocity.x, velocity.z) / RUN_SPEED);
-        player.position.y = (Math.abs(Math.sin(walkPhase)) * 0.03) * speedFactor;
+        const speedFactor = Math.min(1, Math.hypot(vel.x, vel.z)/RUN);
+        player.position.y = (Math.abs(Math.sin(walkPhase))*0.03)*speedFactor;
 
-        if (!modal.classList.contains("show")) {
-          player.position.x += velocity.x * dt;
-          player.position.z += velocity.z * dt;
+        if(!modal.classList.contains("show")){
+          player.position.x += vel.x*dt;
+          player.position.z += vel.z*dt;
         }
 
         player.position.x = THREE.MathUtils.clamp(player.position.x, bounds.xMin, bounds.xMax);
         player.position.z = THREE.MathUtils.clamp(player.position.z, bounds.zMin, bounds.zMax);
 
-        // camera follow + collision
         camTarget.set(player.position.x, 1.35 + player.position.y, player.position.z);
 
-        const cosP = Math.cos(pitch), sinP = Math.sin(pitch);
-        desiredCamPos.set(
-          camTarget.x + Math.sin(yaw) * (distance * cosP),
-          camTarget.y + (distance * sinP) + camUpOffset,
-          camTarget.z + Math.cos(yaw) * (distance * cosP)
+        const cosP=Math.cos(pitch), sinP=Math.sin(pitch);
+        desiredCam.set(
+          camTarget.x + Math.sin(yaw)*(dist*cosP),
+          camTarget.y + (dist*sinP) + camUpOffset,
+          camTarget.z + Math.cos(yaw)*(dist*cosP)
         );
 
-        const collided = applyCameraCollision(camTarget, desiredCamPos);
-        camera.position.lerp(collided, 1 - Math.exp(-10.5 * dt));
+        const camPos = applyCamCollision(camTarget, desiredCam);
+        camera.position.lerp(camPos, 1 - Math.exp(-10.5*dt));
         camera.lookAt(camTarget);
 
         renderer.render(scene, camera);
         requestAnimationFrame(loop);
       }
-
       requestAnimationFrame(loop);
 
-      window.addEventListener("resize", () => {
-        camera.aspect = innerWidth / innerHeight;
+      window.addEventListener("resize", ()=>{
+        camera.aspect = innerWidth/innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(innerWidth, innerHeight);
       });
 
-      showToast("Tip: Hold RMB for Roblox mouse-lock ✨");
+      showToast("Mobile: left pad move, right pad look ✨");
     }
   </script>
 </body>
