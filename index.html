@@ -178,6 +178,10 @@
     </div>
   </div>
 
+  <audio id="bgm" preload="auto" loop playsinline>
+    <source src="./assets/romantic.mp3" type="audio/mpeg">
+  </audio>
+
   <div class="btnBar">
     <button class="uiBtn primary" id="viewBtn">VIEW FRAME</button>
     <button class="uiBtn" id="runBtn">Auto-run</button>
@@ -224,7 +228,7 @@
     // ==============================
     const PHOTO_URLS = [
       // Example (recommended): put files in repo /assets
-      // "./assets/us1.jpg",
+      "./assets/us1.jpg",
       // "./assets/us2.jpg",
       // "./assets/us3.jpg",
       // "./assets/us4.jpg",
@@ -270,6 +274,33 @@
     const runBtn = document.getElementById("runBtn");
     const muteBtn = document.getElementById("muteBtn");
 
+    // ========= Background Music (MP3 in /assets) =========
+    const bgm = document.getElementById("bgm");
+    let musicStarted = false;
+
+    function startMusic() {
+      if (!bgm || musicStarted) return;
+      musicStarted = true;
+
+      bgm.volume = 0.25; // romantic = soft
+      const p = bgm.play();
+
+      // Some browsers return a promise
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          // If it fails (rare after START), user can tap Sound button to trigger play
+          showToast("Tap Sound to enable music 🎵");
+          musicStarted = false;
+        });
+      }
+    }
+
+    function setMusicMuted(muted){
+      if (!bgm) return;
+      bgm.muted = muted;
+    }
+
+
     function showToast(msg){
       toast.textContent = msg;
       toast.classList.add("show");
@@ -299,6 +330,12 @@
       soundEnabled = !mute;
       muteBtn.textContent = mute ? "Sound: OFF" : "Sound: ON";
       if(masterGain) masterGain.gain.value = mute ? 0.0 : 0.55;
+
+      // also mute/unmute the background music
+      setMusicMuted(mute);
+
+      // if unmuting and music hasn't started yet, try starting it
+      if(!mute) startMusic();
     }
 
     muteBtn.addEventListener("click", ()=>{
@@ -499,6 +536,7 @@
 
       // unlock audio on user gesture
       ensureAudio();
+      startMusic();
 
       if(!window.THREE){ overlay.style.display="none"; alert("Three.js failed to load."); return; }
       overlay.style.display="none";
