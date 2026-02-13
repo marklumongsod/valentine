@@ -531,9 +531,12 @@
       ctx.fillText(LOVE_TITLE, c.width/2, 130);
 
       ctx.fillStyle="#2b1a1f";
-      ctx.font="650 48px system-ui";
-      let y=230;
-      for(const line of LOVE_LINES){ ctx.fillText(line, c.width/2, y); y+=60; }
+      ctx.font="600 38px system-ui";   // 🔥 smaller font
+      let y=210;                       // start a bit higher
+      for(const line of LOVE_LINES){ 
+        ctx.fillText(line, c.width/2, y); 
+        y+=48;                         // tighter spacing
+      }
 
       return new THREE.CanvasTexture(c);
     }
@@ -1173,6 +1176,7 @@
   </script>
 </body>
 </html>
+
 
 
 
