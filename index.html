@@ -804,6 +804,31 @@
       loader.crossOrigin = "anonymous";
       const framePlanes = [];
 
+      function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = text.split(" ");
+      let line = "";
+      let lines = [];
+    
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + " ";
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+    
+        if (testWidth > maxWidth && n > 0) {
+          lines.push(line);
+          line = words[n] + " ";
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line);
+    
+      lines.forEach((l, i) => {
+        ctx.fillText(l.trim(), x, y + (i * lineHeight));
+      });
+    }
+    
+          
       function makePlaqueTexture(title, sub){
         const c = document.createElement("canvas");
         c.width = 900; c.height = 240;
@@ -818,17 +843,21 @@
         ctx.lineWidth = 10;
         ctx.strokeRect(10,10,c.width-20,c.height-20);
 
-        const TITLE_SIZE = 30;   // 🔥 change this
-        const SUB_SIZE   = 17;   // 🔥 change this
+        const TITLE_SIZE = 42;
+        const SUB_SIZE = 28;
         
+        ctx.textAlign = "center";
+        
+        // TITLE
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         ctx.font = `900 ${TITLE_SIZE}px system-ui`;
-        ctx.textAlign = "center";
-        ctx.fillText(title, c.width/2, 75);
+        drawWrappedText(ctx, title, c.width/2, 80, 750, 50);
         
-        ctx.fillStyle = "rgba(255,255,255,0.86)";
+        // SUBTEXT
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
         ctx.font = `600 ${SUB_SIZE}px system-ui`;
-        ctx.fillText(sub, c.width/2, 130);
+        drawWrappedText(ctx, sub, c.width/2, 140, 750, 38);
+
 
         ctx.fillStyle = "rgba(255,255,255,0.55)";
         ctx.font = "700 28px system-ui";
@@ -1179,6 +1208,7 @@
   </script>
 </body>
 </html>
+
 
 
 
