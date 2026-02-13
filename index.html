@@ -91,12 +91,10 @@
       font-weight: 900;
     }
     .modalImg{
-      max-width: 100%;
-      max-height: 85vh;
-      width: auto;
-      height: auto;
-      display: block;
-      margin: 0 auto;
+      width:100%;
+      height: min(80vh, 720px);
+      object-fit: contain;   /* 🔥 important */
+      display:block;
       background: #000;
     }
 
@@ -1175,5 +1173,6 @@
   </script>
 </body>
 </html>
+
 
 
